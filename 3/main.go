@@ -26,44 +26,6 @@ func main() {
 	}
 }
 
-// a = 97 A = 65
-func priority(r rune) int {
-	if r >= 'a' && r <= 'z' {
-		return int(r) - 96
-	}
-
-	return int(r) - 64 + 26
-}
-
-func findDuplicate(a, b string) rune {
-	for _, r := range a {
-		if strings.ContainsRune(b, r) {
-			return r
-		}
-	}
-
-	panic("no dupe found")
-}
-
-func findDuplicateMany(strs ...string) rune {
-	if len(strs) == 0 {
-		panic("index out of range")
-	}
-
-loop:
-	for _, r := range strs[0] {
-		for _, other := range strs[1:] {
-			if !strings.ContainsRune(other, r) {
-				continue loop
-			}
-		}
-
-		return r
-	}
-
-	panic("no dupe found")
-}
-
 func runA() error {
 	scanner := bufio.NewScanner(strings.NewReader(input))
 
@@ -105,4 +67,42 @@ loop:
 	fmt.Println("total:", total)
 
 	return scanner.Err()
+}
+
+// a = 97 A = 65
+func priority(r rune) int {
+	if r >= 'a' && r <= 'z' {
+		return int(r) - 96
+	}
+
+	return int(r) - 64 + 26
+}
+
+func findDuplicate(a, b string) rune {
+	for _, r := range a {
+		if strings.ContainsRune(b, r) {
+			return r
+		}
+	}
+
+	panic("no dupe found")
+}
+
+func findDuplicateMany(strs ...string) rune {
+	if len(strs) == 0 {
+		panic("index out of range")
+	}
+
+loop:
+	for _, r := range strs[0] {
+		for _, other := range strs[1:] {
+			if !strings.ContainsRune(other, r) {
+				continue loop
+			}
+		}
+
+		return r
+	}
+
+	panic("no dupe found")
 }
