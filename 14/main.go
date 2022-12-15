@@ -21,19 +21,19 @@ var (
 )
 
 func main() {
-	err := runA()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// err := runA()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
 
-	err = runB()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	// err = runB()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	os.Exit(1)
+	// }
 
-	err = playAnimation()
+	err := playAnimation()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -254,29 +254,19 @@ func (a *animation) Update() error {
 
 	a.area[x][y] = sand
 
-	for x := 300; x < 700; x++ {
-		for y := range a.area[x] {
-			r, g, b := 0, 0, 0
-
-			if a.area[x][y] == sand {
-				r, g, b = 0xc2, 0xb2, 0x80
-			} else if a.area[x][y] == rock {
-				r, g, b = 0x67, 0x67, 0x67
-			}
-
-			for _, xx := range []int{(x - 300) * 2, (x-300)*2 + 1} {
-				for _, yy := range []int{y * 2, y*2 + 1} {
-					a.image.Pix[yy*a.image.Stride+xx*4] = uint8(r)
-					a.image.Pix[yy*a.image.Stride+xx*4+1] = uint8(g)
-					a.image.Pix[yy*a.image.Stride+xx*4+2] = uint8(b)
-					a.image.Pix[yy*a.image.Stride+xx*4+3] = 0xff
-				}
-			}
+	r, g, b := 0xc2, 0xb2, 0x80
+	for _, xx := range []int{(x - 300) * 2, (x-300)*2 + 1} {
+		for _, yy := range []int{y * 2, y*2 + 1} {
+			a.image.Pix[yy*a.image.Stride+xx*4] = uint8(r)
+			a.image.Pix[yy*a.image.Stride+xx*4+1] = uint8(g)
+			a.image.Pix[yy*a.image.Stride+xx*4+2] = uint8(b)
+			a.image.Pix[yy*a.image.Stride+xx*4+3] = 0xff
 		}
 	}
 
 	if x == 500 && y == 0 {
 		a.area = parseInput()
+		a.redraw()
 	}
 
 	return nil
@@ -287,8 +277,32 @@ func (a *animation) Draw(screen *ebiten.Image) {
 }
 
 func (a *animation) Layout(w, h int) (int, int) {
-	s := ebiten.DeviceScaleFactor()
-	return int(float64(w) * s), int(float64(h) * s)
+	return 800, len(a.area[0]) * 2
+}
+
+func (a *animation) redraw() {
+	img := image.NewRGBA(image.Rect(0, 0, 800, len(a.area[0])*2))
+
+	for x := 300; x < 700; x++ {
+		for y := range a.area[x] {
+			r, g, b := 0, 0, 0
+
+			if a.area[x][y] == rock {
+				r, g, b = 0x67, 0x67, 0x67
+			}
+
+			for _, xx := range []int{(x - 300) * 2, (x-300)*2 + 1} {
+				for _, yy := range []int{y * 2, y*2 + 1} {
+					img.Pix[yy*img.Stride+xx*4] = uint8(r)
+					img.Pix[yy*img.Stride+xx*4+1] = uint8(g)
+					img.Pix[yy*img.Stride+xx*4+2] = uint8(b)
+					img.Pix[yy*img.Stride+xx*4+3] = 0xff
+				}
+			}
+		}
+	}
+
+	a.image = img
 }
 
 func playAnimation() error {
@@ -305,11 +319,16 @@ func playAnimation() error {
 	}
 
 	ebiten.SetWindowSize(800, len(area[0])*2)
+	ebiten.SetTPS(180)
+
+	img := image.NewRGBA(image.Rect(0, 0, 800, len(area[0])*2))
 
 	a := &animation{
 		area:  area,
-		image: image.NewRGBA(image.Rect(0, 0, 800, len(area[0])*2)),
+		image: img,
 	}
+
+	a.redraw()
 
 	return ebiten.RunGame(a)
 }
